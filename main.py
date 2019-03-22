@@ -9,15 +9,12 @@ login_manager.init_app(app)
 login_manager.login_view = 'login'
 
 class User(UserMixin):
-
     def __init__(self, id):
         self.id = id
-
 
 @login_manager.user_loader
 def load_user(user_id):
     return User(user_id)
-
 
 @app.route('/Login', methods=['GET', 'POST'])
 def login():
@@ -29,7 +26,6 @@ def login():
         cur.execute('SELECT * FROM user WHERE username ="' + formUsername + '" AND Password ="' + formPassword + '";')
         data = cur.fetchall()
         if len(data) == 0:
-            
             return 'False'
         else:
             cur.execute('SELECT userid FROM user WHERE username ="' + formUsername + '" AND Password ="' + formPassword + '";')
@@ -66,9 +62,6 @@ def createuser():
         else:    
             return redirect(url_for('login'))
     return render_template('CreateUser.html')
-
-    
-
 
 if __name__ == "__main__":
     app.secret_key = "123"
