@@ -1,0 +1,3 @@
+http://codewithawa.com/posts/admin-and-user-login-in-php-and-mysql-database
+
+https://stackoverflow.com/questions/45009926/making-a-login-function-using-sqlite3
