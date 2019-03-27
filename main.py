@@ -1,12 +1,20 @@
 from flask import Flask, redirect, render_template, request, url_for
 from flask_login import login_required, LoginManager, UserMixin, login_user, logout_user
 from sqlite3 import connect, Cursor
+import logging
 
 app = Flask(__name__)
 
 login_manager = LoginManager()
 login_manager.init_app(app)
 login_manager.login_view = 'login'
+
+
+app.logger.disabled = True
+mylog  = logging.getLogger('werkzeug')
+mylog.disabled = True
+
+
 
 class User(UserMixin):
     def __init__(self, id):
@@ -18,6 +26,7 @@ def load_user(user_id):
 
 @app.route('/login', methods=['GET', 'POST'])
 def login():
+    ip = request.environ['REMOTE_ADDR']
     if request.method == 'POST':
         db = connect('database')
         cur = db.cursor()
@@ -26,8 +35,10 @@ def login():
         cur.execute('SELECT * FROM user WHERE username ="' + formUsername + '" AND Password ="' + formPassword + '";')
         data = cur.fetchall()
         if len(data) == 0:
-            return 'False'
+            print('# ' + ip + ' Just tried to login with a not existing account.' )
+            return 'This account does not exist!'
         else:
+            print('# ' + ip + ' Logged on with username: ' + formUsername )
             cur.execute('SELECT userid FROM user WHERE username ="' + formUsername + '" AND Password ="' + formPassword + '";')
             userid = cur.fetchone()[0]
             login_user(User(userid))
@@ -43,11 +54,14 @@ def agenda():
 @app.route('/logout')
 @login_required
 def logout():
+    ip = request.environ['REMOTE_ADDR']
+    print('# ' + ip + ' Logged out.')
     logout_user()
     return redirect(url_for('login'))
 
 @app.route('/createuser', methods=['GET','POST'])
 def createuser():
+    ip = request.environ['REMOTE_ADDR']
     if request.method == 'POST':
         database = connect('database')
         cur = database.cursor()
@@ -59,27 +73,32 @@ def createuser():
         database.commit()
 
         if cur.lastrowid == 0:
+            print('# ' + ip + ' Tried to create a user that already exists:' + username)
             return redirect(url_for('createuser'))
-        else:    
+        else:
+            print('# ' + ip + ' Created new user, username: ' + username + ' email: ' + email)  
             return redirect(url_for('login'))
     return render_template('CreateUser.html')
 
-@app.route('/createfamily', methods=['GET', 'POST'])
+@app.route('/creategroup', methods=['GET', 'POST'])
 @login_required
-def createfamily():
+def creategroup():
+    ip = request.environ['REMOTE_ADDR']
     if request.method == 'POST':
         database = connect('database')
         cur = database.cursor()
-        familyname = request.form['familyname']
+        groupname = request.form['groupname']
 
-        cur.execute('INSERT OR IGNORE INTO family (familyname) VALUES("' + familyname +'");')
+        cur.execute('INSERT OR IGNORE INTO groep (groupname) VALUES("' + groupname +'");')
         database.commit()
         if cur.lastrowid == 0:
-            return redirect(url_for('createfamily'))
-        else:    
+            print('# ' + ip + ' Tried to create a group that already exists: ' + groupname)
+            return render_template('CreateGroup.html', message = 'Groep already exists!')   
+        else:
+            print('# ' + ip + ' Created a new group named: ' + groupname)    
             return redirect(url_for('agenda'))
         return render_template('Agenda.html')
-    return render_template('CreateFamily.html')
+    return render_template('CreateGroup.html')
 
 if __name__ == "__main__":
     app.secret_key = "123"
