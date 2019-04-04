@@ -32,24 +32,23 @@ def login():
         cur = db.cursor()
         formUsername = request.form['username']
         formPassword = request.form['password']
-        cur.execute('SELECT * FROM user WHERE username ="' + formUsername + '" AND Password ="' + formPassword + '";')
+        cur.execute('SELECT * FROM user WHERE username ="' + str(formUsername) + '" AND password ="' + str(formPassword) + '";')
         data = cur.fetchall()
         if len(data) == 0:
             print('# ' + ip + ' Just tried to login with a not existing account.' )
             return 'This account does not exist!'
         else:
             print('# ' + ip + ' Logged on with username: ' + formUsername )
-            cur.execute('SELECT userid FROM user WHERE username ="' + formUsername + '" AND Password ="' + formPassword + '";')
+            cur.execute('SELECT userid FROM user WHERE username="' + formUsername + '" AND password ="' + formPassword + '";')
             userid = cur.fetchone()[0]
             login_user(User(userid))
-            return render_template('Agenda.html')
+            return render_template('dashboard.html')
+    return render_template('auth.html')
 
-    return render_template('Login.html')
-
-@app.route('/agenda')
+@app.route('/agenda', methods=['GET', 'POST'])
 @login_required
 def agenda():
-    return render_template('Agenda.html')
+    return render_template('dashboard.html')
 
 @app.route('/logout')
 @login_required
@@ -97,8 +96,18 @@ def creategroup():
         else:
             print('# ' + ip + ' Created a new group named: ' + groupname)    
             return redirect(url_for('agenda'))
-        return render_template('Agenda.html')
+        return render_template('dashboard.html')
     return render_template('CreateGroup.html')
+
+@app.route('/agenda/newpost', methods=['GET', 'POST'])
+@login_required
+def newpost():
+    if request.method == 'POST':
+        database = connect('database')
+        cur = database.cursor()
+        post = request.form['post']
+        date = request.form['date']
+    return render_template('newpost.html')
 
 if __name__ == "__main__":
     app.secret_key = "123"

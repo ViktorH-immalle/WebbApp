@@ -1,12 +1,24 @@
+.row
+{
+        max-width: 1200px;
+        margin: auto;
+}
+
 .message
 {
         color: red;
 }
 
 
-.bounce-in-fwd {
+.bounce-in-fwd 
+{
 	-webkit-animation: bounce-in-fwd 1.1s both;
-	        animation: bounce-in-fwd 1.1s both;
+                animation: bounce-in-fwd 1.1s both;
+                color: white;
+                border-radius: 8px;
+                background-color: darkcyan;
+                border: none;
+                
 }
 
 @-webkit-keyframes bounce-in-fwd {
