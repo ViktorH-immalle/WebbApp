@@ -14,8 +14,6 @@ app.logger.disabled = True
 mylog  = logging.getLogger('werkzeug')
 mylog.disabled = True
 
-
-
 class User(UserMixin):
     def __init__(self, id):
         self.id = id
